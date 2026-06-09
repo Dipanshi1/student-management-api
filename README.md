@@ -1,5 +1,3 @@
-A secure Student Management REST API built using FastAPI with JWT Authentication, SQLite, Search and Pagination.
-
 # Student Management API
 
 A FastAPI backend project with:
