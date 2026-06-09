@@ -1,15 +1,24 @@
 from fastapi import APIRouter, HTTPException
-from schemas import StudentCreate, StudentUpdate
 from database import get_connection
 from fastapi import Depends
 from routes.auth import get_current_user
+from schemas import (
+    StudentCreate,
+    StudentUpdate,
+    StudentResponse,
+    StudentListResponse
+)
 router = APIRouter()
 
-@router.get("/student/{student_id}")
+@router.get(
+    "/student/{student_id}",
+    response_model=StudentResponse
+)
 def get_student(
     student_id: int,
     current_user = Depends(get_current_user)
 ):
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -37,13 +46,39 @@ def get_student(
     "age": student[2],
     "email": student[3]
 }
+@router.get(
+    "/students",
+    response_model=StudentListResponse
+)
+def get_students(
+    current_user = Depends(get_current_user)
+):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM students WHERE user_id = ?",
+        (current_user["user_id"],)
+    )
+
+    students = cursor.fetchall()
+
+    students_list = []
+
+    for student in students:
+        students_list.append({
+            "id": student[0],
+            "name": student[1],
+            "age": student[2],
+            "email": student[3]
+        })
+
+    conn.close()
 
     return {
-        "id": id,
-        "name": name,
-        "age": age,
-        "email": email
+        "students": students_list
     }
+
 
 @router.post("/student")
 def create_student(
@@ -180,3 +215,4 @@ def get_students(
     return {
     "students": students_list
     }
+

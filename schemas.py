@@ -15,4 +15,12 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-    
+
+class StudentResponse(BaseModel):
+    id: int
+    name: str
+    age: int
+    email: str
+class StudentListResponse(BaseModel):
+    students: list[StudentResponse]
+   
