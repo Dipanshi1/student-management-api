@@ -13,7 +13,7 @@ pwd_context = CryptContext(
 )
 import os
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = "mysecretkey123"
 ALGORITHM = "HS256"
 
 oauth2_scheme = OAuth2PasswordBearer(
