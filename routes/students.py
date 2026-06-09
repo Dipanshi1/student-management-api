@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from database import get_connection
 from fastapi import Depends
 from routes.auth import get_current_user
+from typing import Optional
 from schemas import (
     StudentCreate,
     StudentUpdate,
@@ -51,14 +52,43 @@ def get_student(
     response_model=StudentListResponse
 )
 def get_students(
+    name: Optional[str] = None,
+    skip: int = 0,
+    limit: int = 10,
     current_user = Depends(get_current_user)
 ):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT * FROM students WHERE user_id = ?",
-        (current_user["user_id"],)
+    if name:
+     cursor.execute(
+        """
+        SELECT * FROM students
+        WHERE user_id = ?
+        AND name LIKE ?
+        LIMIT ?
+        OFFSET ?
+        """,
+        (
+            current_user["user_id"],
+            f"%{name}%",
+            limit,
+            skip
+        )
+    )
+    else:
+     cursor.execute(
+        """
+        SELECT * FROM students
+        WHERE user_id = ?
+        LIMIT ?
+        OFFSET ?
+        """,
+        (
+            current_user["user_id"],
+            limit,
+            skip
+        )
     )
 
     students = cursor.fetchall()
@@ -187,32 +217,4 @@ def delete_student(
         "message": "Student deleted successfully"
     }
 
-
-@router.get("/students")
-def get_students(
-    current_user = Depends(get_current_user)
-):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-    "SELECT * FROM students WHERE user_id = ?",
-    (current_user["user_id"],)
-)
-    students = cursor.fetchall()
-
-    students_list = []
-
-    for student in students:
-     students_list.append({
-        "id": student[0],
-        "name": student[1],
-        "age": student[2],
-        "email": student[3]
-    })
-    conn.close()
-
-    return {
-    "students": students_list
-    }
 
