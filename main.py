@@ -17,9 +17,3 @@ def home():
     return {
         "message": "Student Management API"
     }
-
-@app.get("/about")
-def about():
-    return {
-        "course": "FastAPI Backend Training"
-    }

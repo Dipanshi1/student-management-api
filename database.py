@@ -1,7 +1,10 @@
 import sqlite3
 
 def get_connection():
-    return sqlite3.connect("students.db")
+    return sqlite3.connect(
+        "students.db",
+        check_same_thread=False
+    )
 
 def create_tables():
     conn = get_connection()
