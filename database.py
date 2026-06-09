@@ -12,7 +12,8 @@ def create_tables():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         age INTEGER NOT NULL,
-        email TEXT NOT NULL
+        email TEXT NOT NULL,
+        user_id INTEGER NOT NULL
     )
     """)
 

@@ -14,8 +14,12 @@ def get_student(
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT * FROM students WHERE id = ?",
-        (student_id,)
+        """
+        SELECT * FROM students
+        WHERE id = ?
+        AND user_id = ?
+        """,
+        (student_id, current_user["user_id"])
     )
 
     student = cursor.fetchone()
@@ -27,7 +31,12 @@ def get_student(
             detail="Student not found"
         )
 
-    id, name, age, email = student
+    return {
+    "id": student[0],
+    "name": student[1],
+    "age": student[2],
+    "email": student[3]
+}
 
     return {
         "id": id,
@@ -45,16 +54,17 @@ def create_student(
     cursor = conn.cursor()
 
     cursor.execute(
-        """
-        INSERT INTO students(name, age, email)
-        VALUES (?, ?, ?)
-        """,
-        (
-            student.name,
-            student.age,
-            student.email
-        )
+    """
+    INSERT INTO students(name, age, email, user_id)
+    VALUES (?, ?, ?, ?)
+    """,
+    (
+        student.name,
+        student.age,
+        student.email,
+        current_user["user_id"]
     )
+)
 
     conn.commit()
     conn.close()
@@ -73,20 +83,22 @@ def update_student(
     cursor = conn.cursor()
 
     cursor.execute(
-        """
-        UPDATE students
-        SET name = ?,
-            age = ?,
-            email = ?
-        WHERE id = ?
-        """,
-        (
-            student.name,
-            student.age,
-            student.email,
-            student_id
-        )
+    """
+    UPDATE students
+    SET name = ?,
+        age = ?,
+        email = ?
+    WHERE id = ?
+    AND user_id = ?
+    """,
+    (
+        student.name,
+        student.age,
+        student.email,
+        student_id,
+        current_user["user_id"]
     )
+)
 
     conn.commit()
 
@@ -114,9 +126,16 @@ def delete_student(
     cursor = conn.cursor()
 
     cursor.execute(
-        "DELETE FROM students WHERE id = ?",
-        (student_id,)
+    """
+    DELETE FROM students
+    WHERE id = ?
+    AND user_id = ?
+    """,
+    (
+        student_id,
+        current_user["user_id"]
     )
+)
 
     conn.commit()
 
@@ -141,7 +160,10 @@ def get_students(
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM students")
+    cursor.execute(
+    "SELECT * FROM students WHERE user_id = ?",
+    (current_user["user_id"],)
+)
     students = cursor.fetchall()
 
     students_list = []
@@ -153,6 +175,7 @@ def get_students(
         "age": student[2],
         "email": student[3]
     })
+    conn.close()
 
     return {
     "students": students_list
